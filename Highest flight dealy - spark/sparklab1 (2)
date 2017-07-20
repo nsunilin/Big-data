@@ -1,0 +1,34 @@
+//Using spark to find top 10 flights with highest dep Delay
+val flightData =  sc.textFile("/home/administrator/Downloads/2001.csv",2)
+
+val dataFlight = flightData.map(line=>line.split(","))
+
+// get header in a variable 
+val headerData =  dataFlight.first
+
+// remove the header from the data
+val outFlight =  dataFlight.filter(_(0) != headerData(0))
+
+//remove missing value in Dep Delay Column
+val withoutNa=outFlight.filter(m=>(!m(15).contains("NA")))
+
+//taking the required fields : UniCarr Orgin Dest Date DepDelay
+val recLine =  withoutNa.map(m=> (m(8),m(16),m(17),m(0)+"/"+m(1)+"/"+m(2),(m(15).toInt)))
+
+//printing top 10 flights with highest dep Delay
+recLine.takeOrdered(10)(Ordering[Int].reverse.on(m=> (m._5))).foreach(println)
+
+/*output:
+
+(NW,HNL,MSP,2001/1/19,1692)                                                     
+(NW,SNA,DTW,2001/10/25,1592)
+(NW,MCO,MSP,2001/1/6,1561)
+(NW,HNL,MSP,2001/1/8,1499)
+(NW,ORD,MEM,2001/9/19,1477)
+(NW,HNL,MSP,2001/4/11,1466)
+(NW,PHX,DTW,2001/2/9,1435)
+(NW,PHX,DTW,2001/2/2,1435)
+(NW,PHX,DTW,2001/2/14,1435)
+(NW,PHX,DTW,2001/2/4,1435)
+*/
+
